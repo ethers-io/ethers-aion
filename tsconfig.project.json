@@ -10,43 +10,43 @@
   },
   "references": [
     {
-      "path": "./packages/aion-blake2b"
+      "path": "./packages/blake2b"
     },
     {
-      "path": "./packages/aion-address"
+      "path": "./packages/address"
     },
     {
-      "path": "./packages/aion-hash"
+      "path": "./packages/hash"
     },
     {
-      "path": "./packages/aion-abi"
+      "path": "./packages/abi"
     },
     {
-      "path": "./packages/aion-networks"
+      "path": "./packages/networks"
     },
     {
-      "path": "./packages/aion-signing-key"
+      "path": "./packages/signing-key"
     },
     {
-      "path": "./packages/aion-testcases"
+      "path": "./packages/testcases"
     },
     {
-      "path": "./packages/aion-transactions"
+      "path": "./packages/transactions"
     },
     {
-      "path": "./packages/aion-contracts"
+      "path": "./packages/contracts"
     },
     {
-      "path": "./packages/aion-providers"
+      "path": "./packages/providers"
     },
     {
-      "path": "./packages/aion-wallet"
+      "path": "./packages/wallet"
     },
     {
-      "path": "./packages/aion-ethers"
+      "path": "./packages/ethers"
     },
     {
-      "path": "./packages/aion-tests"
+      "path": "./packages/tests"
     }
   ],
   "files": []
