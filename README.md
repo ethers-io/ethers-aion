@@ -1,10 +1,17 @@
 ethers.js (Aion-flavored)
 =========================
 
+Thanks to a generous grant from [The Aion Foundation](https://aion.network), the
+[ethers.js library](https://github.com/ethers-io/ethers.js) is now also available
+for those that wish to develop against the Aion blockchain network.
+
+This library is a complete Aion Wallet implementation and utilities
+in JavaScript (and TypeScript). 
+
 **Features**
 
 - Keep your private keys in your client, **safe** and sound
-- Meta-classes create JavaScript objects from any contract ABI, including **ABIv2** and **Human-Readable ABI** for **FVM Contracts** and AVM standard ABI for *8AVM Contracts**.
+- Meta-classes create JavaScript objects from any contract ABI, including **ABIv2** and **Human-Readable ABI** for **FVM Contracts** and AVM standard ABI for **AVM Contracts**.
 - Connect to Aion using [JSON-RPC](https://github.com/aionnetwork/aion/wiki/JSON-RPC-API-Docs) or [Nodesmith](https://nodesmith.io).
 - Complete functionality for all your **Aion** needs
 - Fully **TypeScript** ready, with definition files and full TypeScript source
@@ -15,12 +22,6 @@ Documentation
 -------------
 
 Coming soon...
-
-
-Related Libraries
------------------
-
-This is
 
 
 Hacking and Contributing
