@@ -1,0 +1,63 @@
+{
+  "name": "@ethersproject-aion/ethers",
+  "version": "5.0.0-beta.135",
+  "description": "Aion specific changes on top of ethers.",
+  "main": "index.js",
+  "scripts": {
+    "dist": "npm run dist-browser && npm run dist-minified",
+    "dist-browser-old": "browserify -s ethersAion -g ./scripts/transform index.js -o ./dist/ethers-aion.js",
+    "dist-browser": "browserify -s ethersAion index.js -o ./dist/ethers-aion.js",
+    "dist-minified": "uglifyjs --compress --mangle --output ./dist/ethers-aion.min.js -- ./dist/ethers-aion.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@ethersproject-aion/abi": ">5.0.0-beta.0",
+    "@ethersproject-aion/address": ">5.0.0-beta.0",
+    "@ethersproject-aion/blake2b": ">5.0.0-beta.0",
+    "@ethersproject-aion/contracts": ">5.0.0-beta.0",
+    "@ethersproject-aion/hash": ">5.0.0-beta.0",
+    "@ethersproject-aion/networks": ">5.0.0-beta.0",
+    "@ethersproject-aion/providers": ">5.0.0-beta.0",
+    "@ethersproject-aion/signing-key": ">5.0.0-beta.0",
+    "@ethersproject-aion/transactions": ">5.0.0-beta.0",
+    "@ethersproject-aion/wallet": ">5.0.0-beta.0",
+    "@ethersproject/abi": ">5.0.0-beta.0",
+    "@ethersproject/abstract-provider": ">5.0.0-beta.0",
+    "@ethersproject/abstract-signer": ">5.0.0-beta.0",
+    "@ethersproject/base64": ">5.0.0-beta.0",
+    "@ethersproject/bignumber": ">5.0.0-beta.0",
+    "@ethersproject/bytes": ">5.0.0-beta.0",
+    "@ethersproject/constants": ">5.0.0-beta.0",
+    "@ethersproject/errors": ">5.0.0-beta.0",
+    "@ethersproject/hash": ">5.0.0-beta.0",
+    "@ethersproject/hdnode": ">5.0.0-beta.0",
+    "@ethersproject/json-wallets": ">5.0.0-beta.0",
+    "@ethersproject/keccak256": ">5.0.0-beta.0",
+    "@ethersproject/networks": ">5.0.0-beta.0",
+    "@ethersproject/pbkdf2": ">5.0.0-beta.0",
+    "@ethersproject/properties": ">5.0.0-beta.0",
+    "@ethersproject/providers": ">5.0.0-beta.0",
+    "@ethersproject/random": ">5.0.0-beta.0",
+    "@ethersproject/rlp": ">5.0.0-beta.0",
+    "@ethersproject/sha2": ">5.0.0-beta.0",
+    "@ethersproject/solidity": ">5.0.0-beta.0",
+    "@ethersproject/strings": ">5.0.0-beta.0",
+    "@ethersproject/units": ">5.0.0-beta.0",
+    "@ethersproject/web": ">5.0.0-beta.0",
+    "@ethersproject/wordlists": ">5.0.0-beta.0"
+  },
+  "devDependencies": {
+    "browserify": "16.2.3",
+    "uglify-es": "3.3.9"
+  },
+  "keywords": [
+    "Ethereum",
+    "ethers"
+  ],
+  "author": "Richard Moore <me@ricmoo.com>",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "tarballHash": "0xb592c54f45584f1dea872e50c7dc78e7ecfab8ee907a1edc38274daa7eae295b"
+}

@@ -1,0 +1,29 @@
+{
+  "name": "@ethersproject-aion/abi",
+  "version": "5.0.0-beta.130",
+  "description": "Error utility functions for ethers.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@ethersproject-aion/address": ">5.0.0-beta.0",
+    "@ethersproject-aion/hash": ">5.0.0-beta.0",
+    "@ethersproject/abi": ">5.0.0-beta.0",
+    "@ethersproject/bignumber": ">5.0.0-beta.0",
+    "@ethersproject/bytes": ">5.0.0-beta.0",
+    "@ethersproject/errors": ">5.0.0-beta.0",
+    "@ethersproject/properties": ">5.0.0-beta.0",
+    "@ethersproject/strings": ">5.0.0-beta.0"
+  },
+  "keywords": [
+    "Ethereum",
+    "ethers"
+  ],
+  "author": "Richard Moore <me@ricmoo.com>",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "tarballHash": "0xeaf11cbab7ba34051de00c52ced13b435137d3bd8a4ac42854110a512bb9a160"
+}

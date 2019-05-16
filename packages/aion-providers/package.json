@@ -1,0 +1,39 @@
+{
+  "name": "@ethersproject-aion/providers",
+  "version": "5.0.0-beta.126",
+  "description": "Error utility functions for ethers.",
+  "main": "index.js",
+  "browser": {
+    "net": "./browser-net.js",
+    "./ipc-provider": "./browser-ipc-provider.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@ethersproject-aion/address": ">5.0.0-beta.0",
+    "@ethersproject-aion/hash": ">5.0.0-beta.0",
+    "@ethersproject-aion/networks": ">5.0.0-beta.0",
+    "@ethersproject-aion/transactions": ">5.0.0-beta.0",
+    "@ethersproject/abstract-provider": ">5.0.0-beta.0",
+    "@ethersproject/abstract-signer": ">5.0.0-beta.0",
+    "@ethersproject/bignumber": ">5.0.0-beta.0",
+    "@ethersproject/bytes": ">5.0.0-beta.0",
+    "@ethersproject/errors": ">5.0.0-beta.0",
+    "@ethersproject/properties": ">5.0.0-beta.0",
+    "@ethersproject/providers": ">5.0.0-beta.0",
+    "@ethersproject/rlp": ">5.0.0-beta.0",
+    "@ethersproject/strings": ">5.0.0-beta.0",
+    "@ethersproject/web": ">5.0.0-beta.0"
+  },
+  "keywords": [
+    "Ethereum",
+    "ethers"
+  ],
+  "author": "Richard Moore <me@ricmoo.com>",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "tarballHash": "0x3302202f411ce5010c395b554373ceb4a6a36ac00f292ebf3821b61546238728"
+}

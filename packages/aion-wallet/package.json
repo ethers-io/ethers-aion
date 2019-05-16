@@ -1,0 +1,36 @@
+{
+  "name": "@ethersproject-aion/wallet",
+  "version": "5.0.0-beta.126",
+  "description": "Wallet class for Aion.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@ethersproject-aion/address": ">5.0.0-beta.0",
+    "@ethersproject-aion/blake2b": ">5.0.0-beta.0",
+    "@ethersproject-aion/hash": ">5.0.0-beta.0",
+    "@ethersproject-aion/signing-key": ">5.0.0-beta.0",
+    "@ethersproject-aion/transactions": ">5.0.0-beta.0",
+    "@ethersproject/abstract-provider": ">5.0.0-beta.0",
+    "@ethersproject/abstract-signer": ">5.0.0-beta.0",
+    "@ethersproject/bignumber": ">5.0.0-beta.0",
+    "@ethersproject/bytes": ">5.0.0-beta.0",
+    "@ethersproject/errors": ">5.0.0-beta.0",
+    "@ethersproject/hdnode": ">5.0.0-beta.0",
+    "@ethersproject/json-wallets": ">5.0.0-beta.0",
+    "@ethersproject/properties": ">5.0.0-beta.0",
+    "@ethersproject/random": ">5.0.0-beta.0",
+    "@ethersproject/wordlists": ">5.0.0-beta.0"
+  },
+  "keywords": [
+    "Ethereum",
+    "ethers"
+  ],
+  "author": "Richard Moore <me@ricmoo.com>",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "tarballHash": "0x85d266d1ddf1eabb270928090a38cb7b786804b59c3bde3c600eb7f7e4bfde6a"
+}

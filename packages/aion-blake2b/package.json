@@ -1,0 +1,24 @@
+{
+  "name": "@ethersproject-aion/blake2b",
+  "version": "5.0.0-beta.124",
+  "description": "Error utility functions for ethers.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@ethersproject/bytes": ">5.0.0-beta.0",
+    "@ethersproject/strings": ">5.0.0-beta.0",
+    "blake2b": "^2.1.2"
+  },
+  "keywords": [
+    "Ethereum",
+    "ethers"
+  ],
+  "author": "Richard Moore <me@ricmoo.com>",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "tarballHash": "0x5b0db592865a64d7b0962088af147ddf3b04eb0db28aad4ce5796536112e45cb"
+}

@@ -1,0 +1,53 @@
+{
+  "compilerOptions": {
+    "lib": [
+      "es2015",
+      "es5",
+      "dom"
+    ],
+    "preserveWatchOutput": true,
+    "pretty": false
+  },
+  "references": [
+    {
+      "path": "./packages/aion-blake2b"
+    },
+    {
+      "path": "./packages/aion-address"
+    },
+    {
+      "path": "./packages/aion-hash"
+    },
+    {
+      "path": "./packages/aion-abi"
+    },
+    {
+      "path": "./packages/aion-networks"
+    },
+    {
+      "path": "./packages/aion-signing-key"
+    },
+    {
+      "path": "./packages/aion-testcases"
+    },
+    {
+      "path": "./packages/aion-transactions"
+    },
+    {
+      "path": "./packages/aion-contracts"
+    },
+    {
+      "path": "./packages/aion-providers"
+    },
+    {
+      "path": "./packages/aion-wallet"
+    },
+    {
+      "path": "./packages/aion-ethers"
+    },
+    {
+      "path": "./packages/aion-tests"
+    }
+  ],
+  "files": []
+}

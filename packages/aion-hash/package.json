@@ -1,0 +1,24 @@
+{
+  "name": "@ethersproject-aion/hash",
+  "version": "5.0.0-beta.124",
+  "description": "Hash utility functions for Aion.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@ethersproject-aion/blake2b": ">5.0.0-beta.0",
+    "@ethersproject/bytes": ">5.0.0-beta.0",
+    "@ethersproject/strings": ">5.0.0-beta.0"
+  },
+  "keywords": [
+    "Ethereum",
+    "ethers"
+  ],
+  "author": "Richard Moore <me@ricmoo.com>",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "tarballHash": "0xd5c0cfac7d079d3788608c40965fa854ace69bc91db134e27ae9ff80f03d150f"
+}
