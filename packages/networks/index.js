@@ -23,11 +23,6 @@ var networks = {
     },
     testnet: testnet,
     mastery: testnet,
-    avmtestnet: {
-        name: "avmtestnet",
-        chainId: -1,
-        _defaultProvider: aionDefaultProvider("avmtestnet")
-    }
 };
 function getNetwork(network) {
     if (network == null) {
