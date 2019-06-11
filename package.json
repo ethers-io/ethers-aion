@@ -19,6 +19,11 @@
   "devDependencies": {
     "@types/assert": "^1.4.1",
     "@types/mocha": "^5.2.0",
+    "@ethersproject/cli": ">5.0.0-beta.0",
+    "@ethersproject/keccak256": ">5.0.0-beta.0",
+    "@ethersproject/random": ">5.0.0-beta.0",
+    "@ethersproject/sha2": ">5.0.0-beta.0",
+    "@ethersproject/web": ">5.0.0-beta.0",
     "aes-js": "3.0.0",
     "browserify": "16.2.3",
     "diff": "4.0.1",

@@ -7,9 +7,9 @@ const semver = require("semver");
 
 const local = require("./local");
 
-const keccak256 = require("../packages/keccak256").keccak256;
-const fetchJson = require("../packages/web").fetchJson;
-const prompt = require("../packages/cli/prompt");
+const keccak256 = require("@ethersproject/keccak256").keccak256;
+const fetchJson = require("@ethersproject/web").fetchJson;
+const prompt = require("@ethersproject/cli/prompt");
 
 const colorify = require("./log").colorify;
 const git = require("./git");

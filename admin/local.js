@@ -1,8 +1,9 @@
 "use strict";
 
+const keccak256 = require("@ethersproject/keccak256").keccak256;
 const packlist = require("npm-packlist");
 const tar = require("tar");
-const keccak256 = require("../packages/keccak256").keccak256;
+
 const { dirnames, loadPackage, ROOT } = require("./depgraph");
 const { resolve, saveJson } = require("./utils");
 

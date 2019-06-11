@@ -17,7 +17,7 @@ const { getPackageVersion } = require("../npm");
 const { resolve } = require("../utils");
 const { colorify, log } = require("../log");
 
-const { getProgressBar } = require("../../packages/cli/prompt");
+const { getProgressBar } = require("@ethersproject/cli/prompt");
 
 let dirnames = getOrdered();
 

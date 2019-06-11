@@ -7,9 +7,9 @@ const resolve = require("path").resolve;
 const AES = require("aes-js");
 const scrypt = require("scrypt-js");
 
-const prompt = require("../packages/cli/prompt");
-const randomBytes = require("../packages/random").randomBytes;
-const computeHmac = require("../packages/sha2").computeHmac;
+const prompt = require("@ethersproject/cli/prompt");
+const randomBytes = require("@ethersproject/random").randomBytes;
+const computeHmac = require("@ethersproject/sha2").computeHmac;
 
 const colorify = require("./log").colorify;
 
