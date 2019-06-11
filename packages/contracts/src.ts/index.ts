@@ -2,7 +2,6 @@
 
 import { Signer } from "@ethersproject/abstract-signer";
 import { BigNumberish } from "@ethersproject/bignumber";
-import { isNamedInstance } from "@ethersproject/properties";
 
 import {
     Contract as _Contract,
@@ -45,7 +44,7 @@ export {
 
 export class Contract extends _Contract {
     static getInterface(contractInterface: ContractInterface): Interface {
-        if (isNamedInstance<Interface>(Interface, contractInterface)) {
+        if (Interface.isInterface(contractInterface)) {
             return contractInterface;
         }
         return new Interface(contractInterface);

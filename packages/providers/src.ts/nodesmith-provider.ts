@@ -1,41 +1,29 @@
 "use strict";
 
 import * as errors from "@ethersproject/errors";
-import { defineReadOnly } from "@ethersproject/properties";
 
-import { getNetwork, Networkish } from "@ethersproject-aion/networks";
+import { Network } from "@ethersproject-aion/networks";
 
-import { JsonRpcProvider } from "./json-rpc-provider";
+import { UrlJsonRpcProvider } from "./url-json-rpc-provider";
 
 const defaultApiKey = "5d45648e30d54e55bc2d0bdbbb2a60e2";
 
-export class NodesmithProvider extends JsonRpcProvider {
-    readonly apiKey: string;
+export class NodesmithProvider extends UrlJsonRpcProvider {
 
-    constructor(network?: Networkish, apiKey?: string) {
-        errors.checkNew(new.target, NodesmithProvider);
+    static getApiKey(apiKey: string): string {
+        return apiKey || defaultApiKey;
+    }
 
-        if (apiKey == null) { apiKey = defaultApiKey; }
-
-        network = getNetwork((network == null) ? "mainnet": network);
-
-        let host = null;
+    static getUrl(network: Network, apiKey: string): string {
         switch (network.name) {
             case "mainnet":
-                host = "aion.api.nodesmith.io/v1/mainnet/jsonrpc";
-                break;
+                return "https://aion.api.nodesmith.io/v1/mainnet/jsonrpc?apiKey=" + apiKey;
             case "mastery":
-                host = "aion.api.nodesmith.io/v1/testnet/jsonrpc";
-                break;
-            case "avmtestnet":
-                host = "aion.api.nodesmith.io/v1/avmtestnet/jsonrpc";
-                break;
+                return "https://aion.api.nodesmith.io/v1/mastery/jsonrpc?apiKey=" + apiKey;
             default:
-               throw new Error("unsupported network");
+                break;
         }
 
-        super("https:/" + "/" + host + (apiKey ? ("?apiKey=" + apiKey): ""));
-
-        defineReadOnly(this, "apiKey", apiKey);
+        return errors.throwArgumentError("unsupported network", "network", network);
     }
 }

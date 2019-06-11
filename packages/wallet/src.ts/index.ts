@@ -6,7 +6,7 @@ import { ExternallyOwnedAccount, Signer } from "@ethersproject/abstract-signer";
 import { arrayify, Bytes, BytesLike, concat, hexDataSlice, isHexString } from "@ethersproject/bytes";
 import * as errors from "@ethersproject/errors";
 import { HDNode, entropyToMnemonic } from "@ethersproject/hdnode";
-import { defineReadOnly, isNamedInstance, resolveProperties, shallowCopy } from "@ethersproject/properties";
+import { defineReadOnly, resolveProperties, shallowCopy } from "@ethersproject/properties";
 import { randomBytes } from "@ethersproject/random";
 import { Wordlist } from "@ethersproject/wordlists/wordlist";
 
@@ -46,7 +46,10 @@ export class Wallet extends Signer implements ExternallyOwnedAccount {
             defineReadOnly(this, "address", computeAddress(this.publicKey));
 
         } else {
-            if (isNamedInstance<SigningKey>(SigningKey, privateKey)) {
+            if (SigningKey.isSigningKey(privateKey)) {
+                if (privateKey.curve !== "ed25519") {
+                    errors.throwArgumentError("unsupported curve; must be secp256k1", "privateKey", "[REDACTED]");
+                }
                 defineReadOnly(this, "_signingKey", () => privateKey);
             } else {
                 let signingKey = new SigningKey(privateKey);
@@ -142,7 +145,7 @@ export class Wallet extends Signer implements ExternallyOwnedAccount {
 
     static populateTransaction(transaction: any, provider: Provider, from: string | Promise<string>): Promise<Transaction> {
 
-      if (!isNamedInstance<Provider>(Provider, provider)) {
+      if (!Provider.isProvider(provider)) {
         errors.throwError("missing provider", errors.INVALID_ARGUMENT, {
             argument: "provider",
             value: provider

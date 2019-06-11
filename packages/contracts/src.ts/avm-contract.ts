@@ -2,9 +2,8 @@
 
 import { Provider, TransactionRequest, TransactionResponse } from "@ethersproject/abstract-provider";
 import { Signer } from "@ethersproject/abstract-signer";
-//import { BigNumber } from "@ethersproject/bignumber";
 import { BytesLike, hexlify } from "@ethersproject/bytes";
-import { defineReadOnly, isNamedInstance, resolveProperties } from "@ethersproject/properties";
+import { defineReadOnly, resolveProperties } from "@ethersproject/properties";
 import { ContractFunction } from "@ethersproject/contracts";
 
 import { AvmInterface } from "@ethersproject-aion/abi";
@@ -76,10 +75,10 @@ export class AvmContract {
         }
         defineReadOnly(this, "interface", contractInterface);
 
-        if (isNamedInstance<Signer>(Signer, signerOrProvider)) {
+        if (Signer.isSigner(signerOrProvider)) {
             defineReadOnly(this, "signer", signerOrProvider);
             defineReadOnly(this, "provider", signerOrProvider.provider || null);
-        } else if (isNamedInstance<Provider>(Provider, signerOrProvider)) {
+        } else if (Provider.isProvider(signerOrProvider)) {
             defineReadOnly(this, "signer", null);
             defineReadOnly(this, "provider", signerOrProvider);
         } else {

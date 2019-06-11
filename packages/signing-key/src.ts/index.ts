@@ -15,10 +15,13 @@ export class SigningKey {
 
     readonly address: string;
 
+    readonly _isSigningKey: boolean;
+
     constructor(privateKey: BytesLike) {
         defineReadOnly(this, "curve", "ed25519");
         defineReadOnly(this, "privateKey", hexlify(privateKey));
         defineReadOnly(this, "publicKey", computePublicKey(this.privateKey));
+        defineReadOnly(this, "_isSigningKey", true);
     }
 
     signDigest(digest: BytesLike): string {
@@ -32,6 +35,10 @@ export class SigningKey {
 
     static fromSeed(seed: BytesLike): SigningKey {
         return new SigningKey(nacl.sign.keyPair.fromSeed(arrayify(seed)).secretKey);
+    }
+
+    static isSigningKey(value: any): value is SigningKey {
+        return !!(value && value._isSigningKey);
     }
 }
 
