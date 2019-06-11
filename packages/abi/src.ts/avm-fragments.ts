@@ -96,6 +96,13 @@ export class AvmFunctionFragment {
         // Remove leader/trailing whitespace and remove space from brackets
         value = value.trim().replace(/\s*\[\s*\]/g, "[]");
 
+        // Replace multiple spaces with single space
+        value = value.replace(/(\s+)/g, " ");
+
+        // Trim off public and static
+        if (value.substring(0, 7) === "public ") { value = value.substring(7); }
+        if (value.substring(0, 7) === "static ") { value = value.substring(7); }
+
         let match = value.match(/^([a-z0-9_\]\[]+)\s+([a-z_][a-z0-9_]*)\s*\(([^)]*)\)\s*$/i);
         if (!match) {
             errors.throwArgumentError("invalid abi fragment", "value", value);
