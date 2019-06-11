@@ -5,7 +5,7 @@ const { ABI } = require("../thirdparty/ABI");
 
 import { randomHexString, randomNumber, saveTests, TestCase } from "..";
 
-const Types: Array<string> = Object.values(ABI.TYPES);
+const Types: Array<string> = Object.keys(ABI.TYPES).map((key) => ABI.TYPES[key]);
 
 function getValue(type: string, seed: string): any {
     if (type.substring(type.length - 2) === "[]") {

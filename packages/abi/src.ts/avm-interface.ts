@@ -144,14 +144,15 @@ export class AvmInterface {
         });
 
         // Add bare names for non-overloaded functions
-        Object.values(unique).forEach((funcList) => {
+        for (let key in unique) {
+            let funcList = unique[key];
             let func = funcList[0];
             if (funcList.length !== 1) {
                  errors.warn("duplicate definition for " + func.name + "; skipping bare name");
                  return;
             }
             funcs[func.name] = func;
-        });
+        }
 
         Object.freeze(funcs);
 
