@@ -142,14 +142,15 @@ var AvmInterface = /** @class */ (function () {
             funcs[func.format()] = func;
         });
         // Add bare names for non-overloaded functions
-        Object.values(unique).forEach(function (funcList) {
+        for (var key in unique) {
+            var funcList = unique[key];
             var func = funcList[0];
             if (funcList.length !== 1) {
                 errors.warn("duplicate definition for " + func.name + "; skipping bare name");
                 return;
             }
             funcs[func.name] = func;
-        });
+        }
         Object.freeze(funcs);
         properties_1.defineReadOnly(this, "functions", funcs);
     }

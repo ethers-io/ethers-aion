@@ -53,7 +53,10 @@ var Wallet = /** @class */ (function (_super) {
             properties_1.defineReadOnly(_this, "address", transactions_1.computeAddress(_this.publicKey));
         }
         else {
-            if (properties_1.isNamedInstance(signing_key_1.SigningKey, privateKey)) {
+            if (signing_key_1.SigningKey.isSigningKey(privateKey)) {
+                if (privateKey.curve !== "ed25519") {
+                    errors.throwArgumentError("unsupported curve; must be secp256k1", "privateKey", "[REDACTED]");
+                }
                 properties_1.defineReadOnly(_this, "_signingKey", function () { return privateKey; });
             }
             else {
@@ -146,7 +149,7 @@ var Wallet = /** @class */ (function (_super) {
         return new Wallet(signing_key_1.SigningKey.fromSeed(node.privateKey));
     };
     Wallet.populateTransaction = function (transaction, provider, from) {
-        if (!properties_1.isNamedInstance(abstract_provider_1.Provider, provider)) {
+        if (!abstract_provider_1.Provider.isProvider(provider)) {
             errors.throwError("missing provider", errors.INVALID_ARGUMENT, {
                 argument: "provider",
                 value: provider

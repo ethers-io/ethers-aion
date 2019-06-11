@@ -1,6 +1,6 @@
 {
   "name": "@ethersproject-aion/contracts",
-  "version": "5.0.0-beta.127",
+  "version": "5.0.0-beta.128",
   "description": "Error utility functions for ethers.",
   "main": "index.js",
   "scripts": {
@@ -26,5 +26,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "tarballHash": "0xf066a9db6deb48d578e51fb1ac019022f0366d616d8cdb23c6d6a45bf6d5c54c"
+  "tarballHash": "0x1ab70e116a22c1797eda36576451b80eca814363d5675128c00286b8d918d8d3"
 }

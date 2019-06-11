@@ -1,6 +1,6 @@
 {
   "name": "@ethersproject-aion/wallet",
-  "version": "5.0.0-beta.126",
+  "version": "5.0.0-beta.127",
   "description": "Wallet class for Aion.",
   "main": "index.js",
   "scripts": {
@@ -32,5 +32,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "tarballHash": "0x85d266d1ddf1eabb270928090a38cb7b786804b59c3bde3c600eb7f7e4bfde6a"
+  "tarballHash": "0x858f9098f8eb192e9896a6a6a4570dc0cbd0d44a146abc8eadd6919970154d9b"
 }

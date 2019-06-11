@@ -1,6 +1,6 @@
 {
   "name": "@ethersproject-aion/signing-key",
-  "version": "5.0.0-beta.124",
+  "version": "5.0.0-beta.125",
   "description": "Elliptic curve library functions for the ed25519 curve.",
   "main": "index.js",
   "scripts": {
@@ -22,5 +22,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "tarballHash": "0x813791b6d0a57962b17c889d70556992fd32bf0ca225e53d4fcca0292ee78970"
+  "tarballHash": "0x4c69af69dadfe9ddb8e18a7c009f95b44124ac548061284b12c79d811dc3e62e"
 }

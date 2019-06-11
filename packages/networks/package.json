@@ -1,6 +1,6 @@
 {
   "name": "@ethersproject-aion/networks",
-  "version": "5.0.0-beta.125",
+  "version": "5.0.0-beta.126",
   "description": "Network definitions for ethers.",
   "main": "index.js",
   "scripts": {
@@ -19,5 +19,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "tarballHash": "0xf2a36ac6efca80bf187b15051b6e8074473a94dba0fb582b608e3987f3e6d8cd"
+  "tarballHash": "0xbc6f25531b50ec207e0bfa0eb608c5ef0e17eaf8162798cb8569d7c28a067a23"
 }

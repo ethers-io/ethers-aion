@@ -13,7 +13,6 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var properties_1 = require("@ethersproject/properties");
 var contracts_1 = require("@ethersproject/contracts");
 var address_1 = require("@ethersproject-aion/address");
 var abi_1 = require("@ethersproject-aion/abi");
@@ -26,7 +25,7 @@ var Contract = /** @class */ (function (_super) {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     Contract.getInterface = function (contractInterface) {
-        if (properties_1.isNamedInstance(abi_1.Interface, contractInterface)) {
+        if (abi_1.Interface.isInterface(contractInterface)) {
             return contractInterface;
         }
         return new abi_1.Interface(contractInterface);

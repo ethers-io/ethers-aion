@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var abstract_provider_1 = require("@ethersproject/abstract-provider");
 var abstract_signer_1 = require("@ethersproject/abstract-signer");
-//import { BigNumber } from "@ethersproject/bignumber";
 var bytes_1 = require("@ethersproject/bytes");
 var properties_1 = require("@ethersproject/properties");
 var abi_1 = require("@ethersproject-aion/abi");
@@ -50,11 +49,11 @@ var AvmContract = /** @class */ (function () {
             contractInterface = abi_1.AvmInterface.fromString(contractInterface);
         }
         properties_1.defineReadOnly(this, "interface", contractInterface);
-        if (properties_1.isNamedInstance(abstract_signer_1.Signer, signerOrProvider)) {
+        if (abstract_signer_1.Signer.isSigner(signerOrProvider)) {
             properties_1.defineReadOnly(this, "signer", signerOrProvider);
             properties_1.defineReadOnly(this, "provider", signerOrProvider.provider || null);
         }
-        else if (properties_1.isNamedInstance(abstract_provider_1.Provider, signerOrProvider)) {
+        else if (abstract_provider_1.Provider.isProvider(signerOrProvider)) {
             properties_1.defineReadOnly(this, "signer", null);
             properties_1.defineReadOnly(this, "provider", signerOrProvider);
         }

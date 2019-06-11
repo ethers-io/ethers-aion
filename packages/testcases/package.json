@@ -1,6 +1,6 @@
 {
   "name": "@ethersproject-aion/testcases",
-  "version": "5.0.0-beta.126",
+  "version": "5.0.0-beta.127",
   "description": "Testcases for the Aion components of ethers.",
   "main": "index.js",
   "scripts": {
@@ -11,8 +11,11 @@
     "@ethersproject/bytes": ">5.0.0-beta.0",
     "@ethersproject/keccak256": ">5.0.0-beta.0",
     "@ethersproject/strings": ">5.0.0-beta.0",
-    "aion-web3": "1.1.4",
     "browserify-zlib": "^0.2.0"
+  },
+  "devDependencies": {
+    "aion-web3": "1.1.4",
+    "@types/node": "10.3.2"
   },
   "keywords": [
     "Ethereum",
@@ -23,5 +26,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "tarballHash": "0x82ae303d681ca9a59b6b852dbf7bbd71a2293f3fb1c309231270afb26355bac7"
+  "tarballHash": "0xaef210782a068ab47a8647dc2a76c1d5168cc37296948365e17393ba2a6a07b0"
 }

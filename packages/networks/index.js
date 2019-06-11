@@ -4,8 +4,7 @@ var properties_1 = require("@ethersproject/properties");
 function aionDefaultProvider(network) {
     return function (providers) {
         if (providers.NodesmithProvider) {
-            // @TODO: What is a safe way to get a new API key?
-            return new providers.NodesmithProvider(network, "8c8a6aa3afe0444e922dd93443e1a1f0");
+            return new providers.NodesmithProvider(network);
         }
         return null;
     };
@@ -23,11 +22,6 @@ var networks = {
     },
     testnet: testnet,
     mastery: testnet,
-    avmtestnet: {
-        name: "avmtestnet",
-        chainId: -1,
-        _defaultProvider: aionDefaultProvider("avmtestnet")
-    }
 };
 function getNetwork(network) {
     if (network == null) {

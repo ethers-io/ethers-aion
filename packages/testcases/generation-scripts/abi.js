@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // Use require so we can grab raw-JavaScript code
 var ABI = require("../thirdparty/ABI").ABI;
 var __1 = require("..");
-var Types = Object.values(ABI.TYPES);
+var Types = Object.keys(ABI.TYPES).map(function (key) { return ABI.TYPES[key]; });
 function getValue(type, seed) {
     if (type.substring(type.length - 2) === "[]") {
         if (__1.randomNumber(seed + "-null", 0, 10) === 0) {

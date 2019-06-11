@@ -1,6 +1,6 @@
 {
   "name": "@ethersproject-aion/ethers",
-  "version": "5.0.0-beta.135",
+  "version": "5.0.0-beta.136",
   "description": "Aion specific changes on top of ethers.",
   "main": "index.js",
   "scripts": {
@@ -59,5 +59,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "tarballHash": "0xb592c54f45584f1dea872e50c7dc78e7ecfab8ee907a1edc38274daa7eae295b"
+  "tarballHash": "0x6f6dafca385d2eb3dc5d9c3af8b421af51c701fa9416a25fafbe7366efdad52c"
 }

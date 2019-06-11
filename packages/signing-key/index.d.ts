@@ -4,10 +4,12 @@ export declare class SigningKey {
     readonly privateKey: string;
     readonly publicKey: string;
     readonly address: string;
+    readonly _isSigningKey: boolean;
     constructor(privateKey: BytesLike);
     signDigest(digest: BytesLike): string;
     computeSharedSecret(otherKey: BytesLike): string;
     static fromSeed(seed: BytesLike): SigningKey;
+    static isSigningKey(value: any): value is SigningKey;
 }
 export declare function recoverPublicKey(digest: BytesLike, signature: BytesLike): string;
 export declare function computePublicKey(key: BytesLike): string;

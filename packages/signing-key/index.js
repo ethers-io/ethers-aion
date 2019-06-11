@@ -16,6 +16,7 @@ var SigningKey = /** @class */ (function () {
         properties_1.defineReadOnly(this, "curve", "ed25519");
         properties_1.defineReadOnly(this, "privateKey", bytes_1.hexlify(privateKey));
         properties_1.defineReadOnly(this, "publicKey", computePublicKey(this.privateKey));
+        properties_1.defineReadOnly(this, "_isSigningKey", true);
     }
     SigningKey.prototype.signDigest = function (digest) {
         var signature = nacl.sign.detached(bytes_1.arrayify(digest), bytes_1.arrayify(this.privateKey));
@@ -26,6 +27,9 @@ var SigningKey = /** @class */ (function () {
     };
     SigningKey.fromSeed = function (seed) {
         return new SigningKey(nacl.sign.keyPair.fromSeed(bytes_1.arrayify(seed)).secretKey);
+    };
+    SigningKey.isSigningKey = function (value) {
+        return !!(value && value._isSigningKey);
     };
     return SigningKey;
 }());

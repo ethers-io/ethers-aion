@@ -1,3 +1,4 @@
+"sue strict";
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -13,17 +14,19 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var json_rpc_provider_1 = require("@ethersproject/providers/json-rpc-provider");
-exports.JsonRpcSigner = json_rpc_provider_1.JsonRpcSigner;
+var url_json_rpc_provider_1 = require("@ethersproject/providers/url-json-rpc-provider");
 var formatter_1 = require("./formatter");
-var JsonRpcProvider = /** @class */ (function (_super) {
-    __extends(JsonRpcProvider, _super);
-    function JsonRpcProvider() {
+var UrlJsonRpcProvider = /** @class */ (function (_super) {
+    __extends(UrlJsonRpcProvider, _super);
+    function UrlJsonRpcProvider() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    JsonRpcProvider.getFormatter = function () {
+    UrlJsonRpcProvider.getFormatter = function () {
         return formatter_1.getDefaultFormatter();
     };
-    return JsonRpcProvider;
-}(json_rpc_provider_1.JsonRpcProvider));
-exports.JsonRpcProvider = JsonRpcProvider;
+    UrlJsonRpcProvider.getUrl = function (network, apiKey) {
+        return url_json_rpc_provider_1.UrlJsonRpcProvider.getUrl(network, apiKey);
+    };
+    return UrlJsonRpcProvider;
+}(url_json_rpc_provider_1.UrlJsonRpcProvider));
+exports.UrlJsonRpcProvider = UrlJsonRpcProvider;

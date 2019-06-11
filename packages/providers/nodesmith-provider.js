@@ -21,38 +21,27 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var errors = __importStar(require("@ethersproject/errors"));
-var properties_1 = require("@ethersproject/properties");
-var networks_1 = require("@ethersproject-aion/networks");
-var json_rpc_provider_1 = require("./json-rpc-provider");
+var url_json_rpc_provider_1 = require("./url-json-rpc-provider");
 var defaultApiKey = "5d45648e30d54e55bc2d0bdbbb2a60e2";
 var NodesmithProvider = /** @class */ (function (_super) {
     __extends(NodesmithProvider, _super);
-    function NodesmithProvider(network, apiKey) {
-        var _newTarget = this.constructor;
-        var _this = this;
-        errors.checkNew(_newTarget, NodesmithProvider);
-        if (apiKey == null) {
-            apiKey = defaultApiKey;
-        }
-        network = networks_1.getNetwork((network == null) ? "mainnet" : network);
-        var host = null;
+    function NodesmithProvider() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    NodesmithProvider.getApiKey = function (apiKey) {
+        return apiKey || defaultApiKey;
+    };
+    NodesmithProvider.getUrl = function (network, apiKey) {
         switch (network.name) {
             case "mainnet":
-                host = "aion.api.nodesmith.io/v1/mainnet/jsonrpc";
-                break;
+                return "https://aion.api.nodesmith.io/v1/mainnet/jsonrpc?apiKey=" + apiKey;
             case "mastery":
-                host = "aion.api.nodesmith.io/v1/testnet/jsonrpc";
-                break;
-            case "avmtestnet":
-                host = "aion.api.nodesmith.io/v1/avmtestnet/jsonrpc";
-                break;
+                return "https://aion.api.nodesmith.io/v1/mastery/jsonrpc?apiKey=" + apiKey;
             default:
-                throw new Error("unsupported network");
+                break;
         }
-        _this = _super.call(this, "https:/" + "/" + host + (apiKey ? ("?apiKey=" + apiKey) : "")) || this;
-        properties_1.defineReadOnly(_this, "apiKey", apiKey);
-        return _this;
-    }
+        return errors.throwArgumentError("unsupported network", "network", network);
+    };
     return NodesmithProvider;
-}(json_rpc_provider_1.JsonRpcProvider));
+}(url_json_rpc_provider_1.UrlJsonRpcProvider));
 exports.NodesmithProvider = NodesmithProvider;
