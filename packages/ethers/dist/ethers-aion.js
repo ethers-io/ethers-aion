@@ -1532,7 +1532,7 @@ var Interface = /** @class */ (function () {
         properties_1.defineReadOnly(this, "fragments", abi.map(function (fragment) {
             return fragments_1.Fragment.from(fragment);
         }).filter(function (fragment) { return (fragment != null); }));
-        properties_1.defineReadOnly(this, "_abiCoder", _newTarget.getAbiCoder());
+        properties_1.defineReadOnly(this, "_abiCoder", properties_1.getStatic((_newTarget), "getAbiCoder")());
         properties_1.defineReadOnly(this, "functions", {});
         properties_1.defineReadOnly(this, "errors", {});
         properties_1.defineReadOnly(this, "events", {});
@@ -2304,7 +2304,7 @@ function getContractAddress(transaction) {
 }
 exports.getContractAddress = getContractAddress;
 
-},{"@ethersproject/bytes":24,"@ethersproject/errors":27,"@ethersproject/keccak256":30,"@ethersproject/rlp":40,"bn.js":67}],19:[function(require,module,exports){
+},{"@ethersproject/bytes":24,"@ethersproject/errors":27,"@ethersproject/keccak256":30,"@ethersproject/rlp":40,"bn.js":66}],19:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var bytes_1 = require("@ethersproject/bytes");
@@ -2674,7 +2674,7 @@ function throwFault(fault, operation, value) {
     return errors.throwError(fault, errors.NUMERIC_FAULT, params);
 }
 
-},{"@ethersproject/bytes":24,"@ethersproject/errors":27,"bn.js":67}],22:[function(require,module,exports){
+},{"@ethersproject/bytes":24,"@ethersproject/errors":27,"bn.js":66}],22:[function(require,module,exports){
 "use strict";
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
@@ -3566,11 +3566,11 @@ function runMethod(contract, functionName, options) {
                     method: method.format()
                 });
             }
-            if (!contract.signer) {
-                errors.throwError("sending a transaction require a signer", errors.UNSUPPORTED_OPERATION, { operation: "sendTransaction" });
-            }
             if (options.transaction) {
                 return properties_1.resolveProperties(tx);
+            }
+            if (!contract.signer) {
+                errors.throwError("sending a transaction require a signer", errors.UNSUPPORTED_OPERATION, { operation: "sendTransaction" });
             }
             return contract.signer.sendTransaction(tx).then(function (tx) {
                 var wait = tx.wait.bind(tx);
@@ -3722,7 +3722,7 @@ var Contract = /** @class */ (function () {
         errors.checkNew(_newTarget, Contract);
         // @TODO: Maybe still check the addressOrName looks like a valid address or name?
         //address = getAddress(address);
-        properties_1.defineReadOnly(this, "interface", _newTarget.getInterface(contractInterface));
+        properties_1.defineReadOnly(this, "interface", properties_1.getStatic((_newTarget), "getInterface")(contractInterface));
         if (abstract_signer_1.Signer.isSigner(signerOrProvider)) {
             properties_1.defineReadOnly(this, "provider", signerOrProvider.provider || null);
             properties_1.defineReadOnly(this, "signer", signerOrProvider);
@@ -4093,7 +4093,7 @@ var ContractFactory = /** @class */ (function () {
             errors.throwArgumentError("invalid signer", "signer", signer);
         }
         properties_1.defineReadOnly(this, "bytecode", bytecodeHex);
-        properties_1.defineReadOnly(this, "interface", _newTarget.getInterface(contractInterface));
+        properties_1.defineReadOnly(this, "interface", properties_1.getStatic((_newTarget), "getInterface")(contractInterface));
         properties_1.defineReadOnly(this, "signer", signer || null);
     }
     ContractFactory.prototype.getDeployTransaction = function () {
@@ -4133,14 +4133,16 @@ var ContractFactory = /** @class */ (function () {
         for (var _i = 0; _i < arguments.length; _i++) {
             args[_i] = arguments[_i];
         }
-        // Get the deployment transaction (with optional overrides)
-        var tx = this.getDeployTransaction.apply(this, args);
-        // Send the deployment transaction
-        return this.signer.sendTransaction(tx).then(function (tx) {
-            var address = (_this.constructor).getContractAddress(tx);
-            var contract = (_this.constructor).getContract(address, _this.interface, _this.signer);
-            properties_1.defineReadOnly(contract, "deployTransaction", tx);
-            return contract;
+        return resolveAddresses(this.signer, args, this.interface.deploy.inputs).then(function (args) {
+            // Get the deployment transaction (with optional overrides)
+            var tx = _this.getDeployTransaction.apply(_this, args);
+            // Send the deployment transaction
+            return _this.signer.sendTransaction(tx).then(function (tx) {
+                var address = (_this.constructor).getContractAddress(tx);
+                var contract = (_this.constructor).getContract(address, _this.interface, _this.signer);
+                properties_1.defineReadOnly(contract, "deployTransaction", tx);
+                return contract;
+            });
         });
     };
     ContractFactory.prototype.attach = function (address) {
@@ -4193,8 +4195,12 @@ exports.NOT_IMPLEMENTED = "NOT_IMPLEMENTED";
 // Unsupported Operation
 //   - operation
 exports.UNSUPPORTED_OPERATION = "UNSUPPORTED_OPERATION";
-// Network Error
+// Network Error (i.e. Ethereum Network, such as an invalid chain ID)
 exports.NETWORK_ERROR = "NETWORK_ERROR";
+// Some sort of bad response from the server
+exports.SERVER_ERROR = "SERVER_ERROR";
+// Timeout
+exports.TIMEOUT = "TIMEOUT";
 ///////////////////
 // Operational  Errors
 // Buffer Overrun
@@ -4517,11 +4523,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-// See: https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki
-// See: https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki
-// The English language word list.
-// For additional word lists, please see @ethersproject//wordlists
-var lang_en_1 = require("@ethersproject/wordlists/lang-en");
 var basex_1 = require("@ethersproject/basex");
 var errors = __importStar(require("@ethersproject/errors"));
 var bytes_1 = require("@ethersproject/bytes");
@@ -4532,6 +4533,7 @@ var properties_1 = require("@ethersproject/properties");
 var signing_key_1 = require("@ethersproject/signing-key");
 var sha2_1 = require("@ethersproject/sha2");
 var transactions_1 = require("@ethersproject/transactions");
+var wordlists_1 = require("@ethersproject/wordlists");
 var N = bignumber_1.BigNumber.from("0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141");
 // "Bitcoin seed"
 var MasterSecret = strings_1.toUtf8Bytes("Bitcoin seed");
@@ -4746,7 +4748,7 @@ function mnemonicToSeed(mnemonic, password) {
 exports.mnemonicToSeed = mnemonicToSeed;
 function mnemonicToEntropy(mnemonic, wordlist) {
     if (!wordlist) {
-        wordlist = lang_en_1.langEn;
+        wordlist = wordlists_1.wordlists["en"];
     }
     errors.checkNormalize();
     var words = wordlist.split(mnemonic);
@@ -4809,7 +4811,7 @@ function entropyToMnemonic(entropy, wordlist) {
     indices[indices.length - 1] <<= checksumBits;
     indices[indices.length - 1] |= (checksum >> (8 - checksumBits));
     if (!wordlist) {
-        wordlist = lang_en_1.langEn;
+        wordlist = wordlists_1.wordlists["en"];
     }
     return wordlist.join(indices.map(function (index) { return wordlist.getWord(index); }));
 }
@@ -4824,13 +4826,16 @@ function isValidMnemonic(mnemonic, wordlist) {
 }
 exports.isValidMnemonic = isValidMnemonic;
 
-},{"@ethersproject/basex":20,"@ethersproject/bignumber":23,"@ethersproject/bytes":24,"@ethersproject/errors":27,"@ethersproject/pbkdf2":32,"@ethersproject/properties":33,"@ethersproject/sha2":41,"@ethersproject/signing-key":54,"@ethersproject/strings":56,"@ethersproject/transactions":57,"@ethersproject/wordlists/lang-en":62}],30:[function(require,module,exports){
+},{"@ethersproject/basex":20,"@ethersproject/bignumber":23,"@ethersproject/bytes":24,"@ethersproject/errors":27,"@ethersproject/pbkdf2":32,"@ethersproject/properties":33,"@ethersproject/sha2":41,"@ethersproject/signing-key":54,"@ethersproject/strings":56,"@ethersproject/transactions":57,"@ethersproject/wordlists":60}],30:[function(require,module,exports){
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-var sha3 = require("js-sha3");
+var js_sha3_1 = __importDefault(require("js-sha3"));
 var bytes_1 = require("@ethersproject/bytes");
 function keccak256(data) {
-    return '0x' + sha3.keccak_256(bytes_1.arrayify(data));
+    return '0x' + js_sha3_1.default.keccak_256(bytes_1.arrayify(data));
 }
 exports.keccak256 = keccak256;
 
@@ -5074,6 +5079,20 @@ function defineReadOnly(object, name, value) {
     });
 }
 exports.defineReadOnly = defineReadOnly;
+// Crawl up the constructor chain to find a static method
+function getStatic(ctor, key) {
+    for (var i = 0; i < 32; i++) {
+        if (ctor[key]) {
+            return ctor[key];
+        }
+        if (!ctor.prototype || typeof (ctor.prototype) !== "object") {
+            break;
+        }
+        ctor = Object.getPrototypeOf(ctor.prototype).constructor;
+    }
+    return null;
+}
+exports.getStatic = getStatic;
 function resolveProperties(object) {
     var result = {};
     var promises = [];
@@ -5307,7 +5326,7 @@ var BaseProvider = /** @class */ (function (_super) {
             _this.ready.catch(function (error) { });
         }
         else {
-            var knownNetwork = networks_1.getNetwork((network == null) ? "homestead" : network);
+            var knownNetwork = properties_1.getStatic((_newTarget), "getNetwork")(network);
             if (knownNetwork) {
                 properties_1.defineReadOnly(_this, "_network", knownNetwork);
                 properties_1.defineReadOnly(_this, "ready", Promise.resolve(_this._network));
@@ -5329,6 +5348,9 @@ var BaseProvider = /** @class */ (function (_super) {
             defaultFormatter = new formatter_1.Formatter();
         }
         return defaultFormatter;
+    };
+    BaseProvider.getNetwork = function (network) {
+        return networks_1.getNetwork((network == null) ? "homestead" : network);
     };
     BaseProvider.prototype.poll = function () {
         var _this = this;
@@ -6080,7 +6102,7 @@ var BaseProvider = /** @class */ (function (_super) {
 }(abstract_provider_1.Provider));
 exports.BaseProvider = BaseProvider;
 
-},{"./formatter":35,"@ethersproject/abstract-provider":16,"@ethersproject/bignumber":23,"@ethersproject/bytes":24,"@ethersproject/errors":27,"@ethersproject/hash":28,"@ethersproject/networks":31,"@ethersproject/properties":33,"@ethersproject/strings":56,"@ethersproject/web":60}],35:[function(require,module,exports){
+},{"./formatter":35,"@ethersproject/abstract-provider":16,"@ethersproject/bignumber":23,"@ethersproject/bytes":24,"@ethersproject/errors":27,"@ethersproject/hash":28,"@ethersproject/networks":31,"@ethersproject/properties":33,"@ethersproject/strings":56,"@ethersproject/web":59}],35:[function(require,module,exports){
 "use strict";
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
@@ -6915,7 +6937,7 @@ var JsonRpcProvider = /** @class */ (function (_super) {
 }(base_provider_1.BaseProvider));
 exports.JsonRpcProvider = JsonRpcProvider;
 
-},{"./base-provider":34,"@ethersproject/abstract-signer":17,"@ethersproject/bignumber":23,"@ethersproject/bytes":24,"@ethersproject/errors":27,"@ethersproject/networks":31,"@ethersproject/properties":33,"@ethersproject/strings":56,"@ethersproject/web":60}],37:[function(require,module,exports){
+},{"./base-provider":34,"@ethersproject/abstract-signer":17,"@ethersproject/bignumber":23,"@ethersproject/bytes":24,"@ethersproject/errors":27,"@ethersproject/networks":31,"@ethersproject/properties":33,"@ethersproject/strings":56,"@ethersproject/web":59}],37:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -9023,16 +9045,9 @@ exports.parseEther = parseEther;
 
 },{"@ethersproject/bignumber/fixednumber":22,"@ethersproject/errors":27}],59:[function(require,module,exports){
 "use strict";
-try {
-    module.exports.XMLHttpRequest = XMLHttpRequest;
-}
-catch (error) {
-    console.log("Warning: XMLHttpRequest is not defined");
-    module.exports.XMLHttpRequest = null;
-}
-
-},{}],60:[function(require,module,exports){
-"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
@@ -9041,7 +9056,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var xmlhttprequest_1 = require("xmlhttprequest");
+var cross_fetch_1 = __importDefault(require("cross-fetch"));
 var base64_1 = require("@ethersproject/base64");
 var errors = __importStar(require("@ethersproject/errors"));
 var properties_1 = require("@ethersproject/properties");
@@ -9049,13 +9064,22 @@ var strings_1 = require("@ethersproject/strings");
 function fetchJson(connection, json, processFunc) {
     var headers = {};
     var url = null;
+    // @TODO: Allow ConnectionInfo to override some of these values
+    var options = {
+        method: "GET",
+        mode: "cors",
+        cache: "no-cache",
+        credentials: "same-origin",
+        redirect: "follow",
+        referrer: "client",
+    };
     var timeout = 2 * 60 * 1000;
     if (typeof (connection) === "string") {
         url = connection;
     }
     else if (typeof (connection) === "object") {
-        if (connection.url == null) {
-            errors.throwError("missing URL", errors.MISSING_ARGUMENT, { arg: "url" });
+        if (connection == null || connection.url == null) {
+            errors.throwArgumentError("missing URL", "connection.url", connection);
         }
         url = connection.url;
         if (typeof (connection.timeout) === "number" && connection.timeout > 0) {
@@ -9067,7 +9091,7 @@ function fetchJson(connection, json, processFunc) {
             }
         }
         if (connection.user != null && connection.password != null) {
-            if (url.substring(0, 6) !== "https:" && connection.allowInsecure !== true) {
+            if (url.substring(0, 6) !== "https:" && connection.allowInsecureAuthentication !== true) {
                 errors.throwError("basic authentication requires a secure https url", errors.INVALID_ARGUMENT, { arg: "url", url: url, user: connection.user, password: "[REDACTED]" });
             }
             var authorization = connection.user + ":" + connection.password;
@@ -9078,18 +9102,19 @@ function fetchJson(connection, json, processFunc) {
         }
     }
     return new Promise(function (resolve, reject) {
-        var request = new xmlhttprequest_1.XMLHttpRequest();
         var timer = null;
-        timer = setTimeout(function () {
-            if (timer == null) {
-                return;
-            }
-            timer = null;
-            reject(new Error("timeout"));
-            setTimeout(function () {
-                request.abort();
-            }, 0);
-        }, timeout);
+        if (timeout) {
+            timer = setTimeout(function () {
+                if (timer == null) {
+                    return;
+                }
+                timer = null;
+                reject(errors.makeError("timeout", errors.TIMEOUT, {}));
+                //setTimeout(() => {
+                //    request.abort();
+                //}, 0);
+            }, timeout);
+        }
         var cancelTimeout = function () {
             if (timer == null) {
                 return;
@@ -9098,83 +9123,61 @@ function fetchJson(connection, json, processFunc) {
             timer = null;
         };
         if (json) {
-            request.open("POST", url, true);
+            options.method = "POST";
+            options.body = json;
             headers["content-type"] = { key: "Content-Type", value: "application/json" };
         }
-        else {
-            request.open("GET", url, true);
-        }
+        var flatHeaders = {};
         Object.keys(headers).forEach(function (key) {
             var header = headers[key];
-            request.setRequestHeader(header.key, header.value);
+            flatHeaders[header.key] = header.value;
         });
-        request.onreadystatechange = function () {
-            if (request.readyState !== 4) {
-                return;
-            }
-            if (request.status != 200) {
-                cancelTimeout();
-                // @TODO: not any!
-                var error = new Error("invalid response - " + request.status);
-                error.statusCode = request.status;
-                if (request.responseText) {
-                    error.responseText = request.responseText;
+        options.headers = flatHeaders;
+        return cross_fetch_1.default(url, options).then(function (response) {
+            return response.text().then(function (body) {
+                if (!response.ok) {
+                    errors.throwError("bad response", errors.SERVER_ERROR, {
+                        status: response.status,
+                        body: body,
+                        type: response.type,
+                        url: response.url
+                    });
                 }
-                reject(error);
-                return;
-            }
-            var result = null;
+                return body;
+            });
+        }).then(function (text) {
+            var json = null;
             try {
-                result = JSON.parse(request.responseText);
+                json = JSON.parse(text);
             }
             catch (error) {
-                cancelTimeout();
-                // @TODO: not any!
-                var jsonError = new Error("invalid json response");
-                jsonError.orginialError = error;
-                jsonError.responseText = request.responseText;
-                if (json != null) {
-                    jsonError.requestBody = json;
-                }
-                jsonError.url = url;
-                reject(jsonError);
-                return;
+                errors.throwError("invalid JSON", errors.SERVER_ERROR, {
+                    body: text,
+                    error: error,
+                    url: url
+                });
             }
             if (processFunc) {
                 try {
-                    result = processFunc(result);
+                    json = processFunc(json);
                 }
                 catch (error) {
-                    cancelTimeout();
-                    error.url = url;
-                    error.body = json;
-                    error.responseText = request.responseText;
-                    reject(error);
-                    return;
+                    errors.throwError("processing response error", errors.SERVER_ERROR, {
+                        body: json,
+                        error: error
+                    });
                 }
             }
+            return json;
+        }, function (error) {
+            throw error;
+        }).then(function (result) {
             cancelTimeout();
             resolve(result);
-        };
-        request.onerror = function (error) {
+        }, function (error) {
             cancelTimeout();
             reject(error);
-        };
-        try {
-            if (json != null) {
-                request.send(json);
-            }
-            else {
-                request.send();
-            }
-        }
-        catch (error) {
-            cancelTimeout();
-            // @TODO: not any!
-            var connectionError = new Error("connection error");
-            connectionError.error = error;
-            reject(connectionError);
-        }
+        });
     });
 }
 exports.fetchJson = fetchJson;
@@ -9256,14 +9259,18 @@ function poll(func, options) {
 }
 exports.poll = poll;
 
-},{"@ethersproject/base64":19,"@ethersproject/errors":27,"@ethersproject/properties":33,"@ethersproject/strings":56,"xmlhttprequest":59}],61:[function(require,module,exports){
+},{"@ethersproject/base64":19,"@ethersproject/errors":27,"@ethersproject/properties":33,"@ethersproject/strings":56,"cross-fetch":69}],60:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+// Wordlists
+// See: https://github.com/bitcoin/bips/blob/master/bip-0039/bip-0039-wordlists.md
+var wordlist_1 = require("./wordlist");
+exports.Wordlist = wordlist_1.Wordlist;
 var lang_en_1 = require("./lang-en");
-var en = lang_en_1.langEn;
-exports.en = en;
+var wordlists = { en: lang_en_1.langEn };
+exports.wordlists = wordlists;
 
-},{"./lang-en":62}],62:[function(require,module,exports){
+},{"./lang-en":61,"./wordlist":62}],61:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -9311,7 +9318,7 @@ var langEn = new LangEn();
 exports.langEn = langEn;
 wordlist_1.register(langEn);
 
-},{"./wordlist":63}],63:[function(require,module,exports){
+},{"./wordlist":62}],62:[function(require,module,exports){
 (function (global){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -9371,7 +9378,7 @@ function register(lang, name) {
 exports.register = register;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"@ethersproject/errors":27,"@ethersproject/hash":28,"@ethersproject/properties":33}],64:[function(require,module,exports){
+},{"@ethersproject/errors":27,"@ethersproject/hash":28,"@ethersproject/properties":33}],63:[function(require,module,exports){
 
 module.exports = loadWebAssembly
 
@@ -9434,7 +9441,7 @@ function charCodeAt (c) {
   return c.charCodeAt(0)
 }
 
-},{}],65:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 var assert = require('nanoassert')
 var wasm = require('./blake2b')()
 
@@ -9564,7 +9571,7 @@ function toHex (n) {
   return n.toString(16)
 }
 
-},{"./blake2b":64,"nanoassert":102}],66:[function(require,module,exports){
+},{"./blake2b":63,"nanoassert":102}],65:[function(require,module,exports){
 var assert = require('nanoassert')
 var b2wasm = require('blake2b-wasm')
 
@@ -9879,7 +9886,7 @@ b2wasm.ready(function (err) {
   }
 })
 
-},{"blake2b-wasm":65,"nanoassert":102}],67:[function(require,module,exports){
+},{"blake2b-wasm":64,"nanoassert":102}],66:[function(require,module,exports){
 (function (module, exports) {
   'use strict';
 
@@ -13308,7 +13315,7 @@ b2wasm.ready(function (err) {
   };
 })(typeof module === 'undefined' || module, this);
 
-},{"buffer":69}],68:[function(require,module,exports){
+},{"buffer":68}],67:[function(require,module,exports){
 var r;
 
 module.exports = function rand(len) {
@@ -13375,7 +13382,554 @@ if (typeof self === 'object') {
   }
 }
 
-},{"crypto":69}],69:[function(require,module,exports){
+},{"crypto":68}],68:[function(require,module,exports){
+
+},{}],69:[function(require,module,exports){
+var __self__ = (function (root) {
+function F() {
+this.fetch = false;
+this.DOMException = root.DOMException
+}
+F.prototype = root;
+return new F();
+})(typeof self !== 'undefined' ? self : this);
+(function(self) {
+
+var irrelevant = (function (exports) {
+  var support = {
+    searchParams: 'URLSearchParams' in self,
+    iterable: 'Symbol' in self && 'iterator' in Symbol,
+    blob:
+      'FileReader' in self &&
+      'Blob' in self &&
+      (function() {
+        try {
+          new Blob();
+          return true
+        } catch (e) {
+          return false
+        }
+      })(),
+    formData: 'FormData' in self,
+    arrayBuffer: 'ArrayBuffer' in self
+  };
+
+  function isDataView(obj) {
+    return obj && DataView.prototype.isPrototypeOf(obj)
+  }
+
+  if (support.arrayBuffer) {
+    var viewClasses = [
+      '[object Int8Array]',
+      '[object Uint8Array]',
+      '[object Uint8ClampedArray]',
+      '[object Int16Array]',
+      '[object Uint16Array]',
+      '[object Int32Array]',
+      '[object Uint32Array]',
+      '[object Float32Array]',
+      '[object Float64Array]'
+    ];
+
+    var isArrayBufferView =
+      ArrayBuffer.isView ||
+      function(obj) {
+        return obj && viewClasses.indexOf(Object.prototype.toString.call(obj)) > -1
+      };
+  }
+
+  function normalizeName(name) {
+    if (typeof name !== 'string') {
+      name = String(name);
+    }
+    if (/[^a-z0-9\-#$%&'*+.^_`|~]/i.test(name)) {
+      throw new TypeError('Invalid character in header field name')
+    }
+    return name.toLowerCase()
+  }
+
+  function normalizeValue(value) {
+    if (typeof value !== 'string') {
+      value = String(value);
+    }
+    return value
+  }
+
+  // Build a destructive iterator for the value list
+  function iteratorFor(items) {
+    var iterator = {
+      next: function() {
+        var value = items.shift();
+        return {done: value === undefined, value: value}
+      }
+    };
+
+    if (support.iterable) {
+      iterator[Symbol.iterator] = function() {
+        return iterator
+      };
+    }
+
+    return iterator
+  }
+
+  function Headers(headers) {
+    this.map = {};
+
+    if (headers instanceof Headers) {
+      headers.forEach(function(value, name) {
+        this.append(name, value);
+      }, this);
+    } else if (Array.isArray(headers)) {
+      headers.forEach(function(header) {
+        this.append(header[0], header[1]);
+      }, this);
+    } else if (headers) {
+      Object.getOwnPropertyNames(headers).forEach(function(name) {
+        this.append(name, headers[name]);
+      }, this);
+    }
+  }
+
+  Headers.prototype.append = function(name, value) {
+    name = normalizeName(name);
+    value = normalizeValue(value);
+    var oldValue = this.map[name];
+    this.map[name] = oldValue ? oldValue + ', ' + value : value;
+  };
+
+  Headers.prototype['delete'] = function(name) {
+    delete this.map[normalizeName(name)];
+  };
+
+  Headers.prototype.get = function(name) {
+    name = normalizeName(name);
+    return this.has(name) ? this.map[name] : null
+  };
+
+  Headers.prototype.has = function(name) {
+    return this.map.hasOwnProperty(normalizeName(name))
+  };
+
+  Headers.prototype.set = function(name, value) {
+    this.map[normalizeName(name)] = normalizeValue(value);
+  };
+
+  Headers.prototype.forEach = function(callback, thisArg) {
+    for (var name in this.map) {
+      if (this.map.hasOwnProperty(name)) {
+        callback.call(thisArg, this.map[name], name, this);
+      }
+    }
+  };
+
+  Headers.prototype.keys = function() {
+    var items = [];
+    this.forEach(function(value, name) {
+      items.push(name);
+    });
+    return iteratorFor(items)
+  };
+
+  Headers.prototype.values = function() {
+    var items = [];
+    this.forEach(function(value) {
+      items.push(value);
+    });
+    return iteratorFor(items)
+  };
+
+  Headers.prototype.entries = function() {
+    var items = [];
+    this.forEach(function(value, name) {
+      items.push([name, value]);
+    });
+    return iteratorFor(items)
+  };
+
+  if (support.iterable) {
+    Headers.prototype[Symbol.iterator] = Headers.prototype.entries;
+  }
+
+  function consumed(body) {
+    if (body.bodyUsed) {
+      return Promise.reject(new TypeError('Already read'))
+    }
+    body.bodyUsed = true;
+  }
+
+  function fileReaderReady(reader) {
+    return new Promise(function(resolve, reject) {
+      reader.onload = function() {
+        resolve(reader.result);
+      };
+      reader.onerror = function() {
+        reject(reader.error);
+      };
+    })
+  }
+
+  function readBlobAsArrayBuffer(blob) {
+    var reader = new FileReader();
+    var promise = fileReaderReady(reader);
+    reader.readAsArrayBuffer(blob);
+    return promise
+  }
+
+  function readBlobAsText(blob) {
+    var reader = new FileReader();
+    var promise = fileReaderReady(reader);
+    reader.readAsText(blob);
+    return promise
+  }
+
+  function readArrayBufferAsText(buf) {
+    var view = new Uint8Array(buf);
+    var chars = new Array(view.length);
+
+    for (var i = 0; i < view.length; i++) {
+      chars[i] = String.fromCharCode(view[i]);
+    }
+    return chars.join('')
+  }
+
+  function bufferClone(buf) {
+    if (buf.slice) {
+      return buf.slice(0)
+    } else {
+      var view = new Uint8Array(buf.byteLength);
+      view.set(new Uint8Array(buf));
+      return view.buffer
+    }
+  }
+
+  function Body() {
+    this.bodyUsed = false;
+
+    this._initBody = function(body) {
+      this._bodyInit = body;
+      if (!body) {
+        this._bodyText = '';
+      } else if (typeof body === 'string') {
+        this._bodyText = body;
+      } else if (support.blob && Blob.prototype.isPrototypeOf(body)) {
+        this._bodyBlob = body;
+      } else if (support.formData && FormData.prototype.isPrototypeOf(body)) {
+        this._bodyFormData = body;
+      } else if (support.searchParams && URLSearchParams.prototype.isPrototypeOf(body)) {
+        this._bodyText = body.toString();
+      } else if (support.arrayBuffer && support.blob && isDataView(body)) {
+        this._bodyArrayBuffer = bufferClone(body.buffer);
+        // IE 10-11 can't handle a DataView body.
+        this._bodyInit = new Blob([this._bodyArrayBuffer]);
+      } else if (support.arrayBuffer && (ArrayBuffer.prototype.isPrototypeOf(body) || isArrayBufferView(body))) {
+        this._bodyArrayBuffer = bufferClone(body);
+      } else {
+        this._bodyText = body = Object.prototype.toString.call(body);
+      }
+
+      if (!this.headers.get('content-type')) {
+        if (typeof body === 'string') {
+          this.headers.set('content-type', 'text/plain;charset=UTF-8');
+        } else if (this._bodyBlob && this._bodyBlob.type) {
+          this.headers.set('content-type', this._bodyBlob.type);
+        } else if (support.searchParams && URLSearchParams.prototype.isPrototypeOf(body)) {
+          this.headers.set('content-type', 'application/x-www-form-urlencoded;charset=UTF-8');
+        }
+      }
+    };
+
+    if (support.blob) {
+      this.blob = function() {
+        var rejected = consumed(this);
+        if (rejected) {
+          return rejected
+        }
+
+        if (this._bodyBlob) {
+          return Promise.resolve(this._bodyBlob)
+        } else if (this._bodyArrayBuffer) {
+          return Promise.resolve(new Blob([this._bodyArrayBuffer]))
+        } else if (this._bodyFormData) {
+          throw new Error('could not read FormData body as blob')
+        } else {
+          return Promise.resolve(new Blob([this._bodyText]))
+        }
+      };
+
+      this.arrayBuffer = function() {
+        if (this._bodyArrayBuffer) {
+          return consumed(this) || Promise.resolve(this._bodyArrayBuffer)
+        } else {
+          return this.blob().then(readBlobAsArrayBuffer)
+        }
+      };
+    }
+
+    this.text = function() {
+      var rejected = consumed(this);
+      if (rejected) {
+        return rejected
+      }
+
+      if (this._bodyBlob) {
+        return readBlobAsText(this._bodyBlob)
+      } else if (this._bodyArrayBuffer) {
+        return Promise.resolve(readArrayBufferAsText(this._bodyArrayBuffer))
+      } else if (this._bodyFormData) {
+        throw new Error('could not read FormData body as text')
+      } else {
+        return Promise.resolve(this._bodyText)
+      }
+    };
+
+    if (support.formData) {
+      this.formData = function() {
+        return this.text().then(decode)
+      };
+    }
+
+    this.json = function() {
+      return this.text().then(JSON.parse)
+    };
+
+    return this
+  }
+
+  // HTTP methods whose capitalization should be normalized
+  var methods = ['DELETE', 'GET', 'HEAD', 'OPTIONS', 'POST', 'PUT'];
+
+  function normalizeMethod(method) {
+    var upcased = method.toUpperCase();
+    return methods.indexOf(upcased) > -1 ? upcased : method
+  }
+
+  function Request(input, options) {
+    options = options || {};
+    var body = options.body;
+
+    if (input instanceof Request) {
+      if (input.bodyUsed) {
+        throw new TypeError('Already read')
+      }
+      this.url = input.url;
+      this.credentials = input.credentials;
+      if (!options.headers) {
+        this.headers = new Headers(input.headers);
+      }
+      this.method = input.method;
+      this.mode = input.mode;
+      this.signal = input.signal;
+      if (!body && input._bodyInit != null) {
+        body = input._bodyInit;
+        input.bodyUsed = true;
+      }
+    } else {
+      this.url = String(input);
+    }
+
+    this.credentials = options.credentials || this.credentials || 'same-origin';
+    if (options.headers || !this.headers) {
+      this.headers = new Headers(options.headers);
+    }
+    this.method = normalizeMethod(options.method || this.method || 'GET');
+    this.mode = options.mode || this.mode || null;
+    this.signal = options.signal || this.signal;
+    this.referrer = null;
+
+    if ((this.method === 'GET' || this.method === 'HEAD') && body) {
+      throw new TypeError('Body not allowed for GET or HEAD requests')
+    }
+    this._initBody(body);
+  }
+
+  Request.prototype.clone = function() {
+    return new Request(this, {body: this._bodyInit})
+  };
+
+  function decode(body) {
+    var form = new FormData();
+    body
+      .trim()
+      .split('&')
+      .forEach(function(bytes) {
+        if (bytes) {
+          var split = bytes.split('=');
+          var name = split.shift().replace(/\+/g, ' ');
+          var value = split.join('=').replace(/\+/g, ' ');
+          form.append(decodeURIComponent(name), decodeURIComponent(value));
+        }
+      });
+    return form
+  }
+
+  function parseHeaders(rawHeaders) {
+    var headers = new Headers();
+    // Replace instances of \r\n and \n followed by at least one space or horizontal tab with a space
+    // https://tools.ietf.org/html/rfc7230#section-3.2
+    var preProcessedHeaders = rawHeaders.replace(/\r?\n[\t ]+/g, ' ');
+    preProcessedHeaders.split(/\r?\n/).forEach(function(line) {
+      var parts = line.split(':');
+      var key = parts.shift().trim();
+      if (key) {
+        var value = parts.join(':').trim();
+        headers.append(key, value);
+      }
+    });
+    return headers
+  }
+
+  Body.call(Request.prototype);
+
+  function Response(bodyInit, options) {
+    if (!options) {
+      options = {};
+    }
+
+    this.type = 'default';
+    this.status = options.status === undefined ? 200 : options.status;
+    this.ok = this.status >= 200 && this.status < 300;
+    this.statusText = 'statusText' in options ? options.statusText : 'OK';
+    this.headers = new Headers(options.headers);
+    this.url = options.url || '';
+    this._initBody(bodyInit);
+  }
+
+  Body.call(Response.prototype);
+
+  Response.prototype.clone = function() {
+    return new Response(this._bodyInit, {
+      status: this.status,
+      statusText: this.statusText,
+      headers: new Headers(this.headers),
+      url: this.url
+    })
+  };
+
+  Response.error = function() {
+    var response = new Response(null, {status: 0, statusText: ''});
+    response.type = 'error';
+    return response
+  };
+
+  var redirectStatuses = [301, 302, 303, 307, 308];
+
+  Response.redirect = function(url, status) {
+    if (redirectStatuses.indexOf(status) === -1) {
+      throw new RangeError('Invalid status code')
+    }
+
+    return new Response(null, {status: status, headers: {location: url}})
+  };
+
+  exports.DOMException = self.DOMException;
+  try {
+    new exports.DOMException();
+  } catch (err) {
+    exports.DOMException = function(message, name) {
+      this.message = message;
+      this.name = name;
+      var error = Error(message);
+      this.stack = error.stack;
+    };
+    exports.DOMException.prototype = Object.create(Error.prototype);
+    exports.DOMException.prototype.constructor = exports.DOMException;
+  }
+
+  function fetch(input, init) {
+    return new Promise(function(resolve, reject) {
+      var request = new Request(input, init);
+
+      if (request.signal && request.signal.aborted) {
+        return reject(new exports.DOMException('Aborted', 'AbortError'))
+      }
+
+      var xhr = new XMLHttpRequest();
+
+      function abortXhr() {
+        xhr.abort();
+      }
+
+      xhr.onload = function() {
+        var options = {
+          status: xhr.status,
+          statusText: xhr.statusText,
+          headers: parseHeaders(xhr.getAllResponseHeaders() || '')
+        };
+        options.url = 'responseURL' in xhr ? xhr.responseURL : options.headers.get('X-Request-URL');
+        var body = 'response' in xhr ? xhr.response : xhr.responseText;
+        resolve(new Response(body, options));
+      };
+
+      xhr.onerror = function() {
+        reject(new TypeError('Network request failed'));
+      };
+
+      xhr.ontimeout = function() {
+        reject(new TypeError('Network request failed'));
+      };
+
+      xhr.onabort = function() {
+        reject(new exports.DOMException('Aborted', 'AbortError'));
+      };
+
+      xhr.open(request.method, request.url, true);
+
+      if (request.credentials === 'include') {
+        xhr.withCredentials = true;
+      } else if (request.credentials === 'omit') {
+        xhr.withCredentials = false;
+      }
+
+      if ('responseType' in xhr && support.blob) {
+        xhr.responseType = 'blob';
+      }
+
+      request.headers.forEach(function(value, name) {
+        xhr.setRequestHeader(name, value);
+      });
+
+      if (request.signal) {
+        request.signal.addEventListener('abort', abortXhr);
+
+        xhr.onreadystatechange = function() {
+          // DONE (success or failure)
+          if (xhr.readyState === 4) {
+            request.signal.removeEventListener('abort', abortXhr);
+          }
+        };
+      }
+
+      xhr.send(typeof request._bodyInit === 'undefined' ? null : request._bodyInit);
+    })
+  }
+
+  fetch.polyfill = true;
+
+  if (!self.fetch) {
+    self.fetch = fetch;
+    self.Headers = Headers;
+    self.Request = Request;
+    self.Response = Response;
+  }
+
+  exports.Headers = Headers;
+  exports.Request = Request;
+  exports.Response = Response;
+  exports.fetch = fetch;
+
+  return exports;
+
+}({}));
+})(__self__);
+delete __self__.fetch.polyfill
+exports = __self__.fetch // To enable: import fetch from 'cross-fetch'
+exports.default = __self__.fetch // For TypeScript consumers without esModuleInterop.
+exports.fetch = __self__.fetch // To enable: import {fetch} from 'cross-fetch'
+exports.Headers = __self__.Headers
+exports.Request = __self__.Request
+exports.Response = __self__.Response
+module.exports = exports
 
 },{}],70:[function(require,module,exports){
 'use strict';
@@ -13393,7 +13947,7 @@ elliptic.curves = require('./elliptic/curves');
 elliptic.ec = require('./elliptic/ec');
 elliptic.eddsa = require('./elliptic/eddsa');
 
-},{"../package.json":86,"./elliptic/curve":73,"./elliptic/curves":76,"./elliptic/ec":77,"./elliptic/eddsa":80,"./elliptic/hmac-drbg":83,"./elliptic/utils":85,"brorand":68}],71:[function(require,module,exports){
+},{"../package.json":86,"./elliptic/curve":73,"./elliptic/curves":76,"./elliptic/ec":77,"./elliptic/eddsa":80,"./elliptic/hmac-drbg":83,"./elliptic/utils":85,"brorand":67}],71:[function(require,module,exports){
 'use strict';
 
 var BN = require('bn.js');
@@ -13770,7 +14324,7 @@ BasePoint.prototype.dblp = function dblp(k) {
   return r;
 };
 
-},{"../../elliptic":70,"bn.js":67}],72:[function(require,module,exports){
+},{"../../elliptic":70,"bn.js":66}],72:[function(require,module,exports){
 'use strict';
 
 var curve = require('../curve');
@@ -14205,7 +14759,7 @@ Point.prototype.eqXToP = function eqXToP(x) {
 Point.prototype.toP = Point.prototype.normalize;
 Point.prototype.mixedAdd = Point.prototype.add;
 
-},{"../../elliptic":70,"../curve":73,"bn.js":67,"inherits":99}],73:[function(require,module,exports){
+},{"../../elliptic":70,"../curve":73,"bn.js":66,"inherits":99}],73:[function(require,module,exports){
 'use strict';
 
 var curve = exports;
@@ -14397,7 +14951,7 @@ Point.prototype.getX = function getX() {
   return this.x.fromRed();
 };
 
-},{"../../elliptic":70,"../curve":73,"bn.js":67,"inherits":99}],75:[function(require,module,exports){
+},{"../../elliptic":70,"../curve":73,"bn.js":66,"inherits":99}],75:[function(require,module,exports){
 'use strict';
 
 var curve = require('../curve');
@@ -15337,7 +15891,7 @@ JPoint.prototype.isInfinity = function isInfinity() {
   return this.z.cmpn(0) === 0;
 };
 
-},{"../../elliptic":70,"../curve":73,"bn.js":67,"inherits":99}],76:[function(require,module,exports){
+},{"../../elliptic":70,"../curve":73,"bn.js":66,"inherits":99}],76:[function(require,module,exports){
 'use strict';
 
 var curves = exports;
@@ -15783,7 +16337,7 @@ EC.prototype.getKeyRecoveryParam = function(e, signature, Q, enc) {
   throw new Error('Unable to find valid recovery factor');
 };
 
-},{"../../elliptic":70,"./key":78,"./signature":79,"bn.js":67}],78:[function(require,module,exports){
+},{"../../elliptic":70,"./key":78,"./signature":79,"bn.js":66}],78:[function(require,module,exports){
 'use strict';
 
 var BN = require('bn.js');
@@ -15904,7 +16458,7 @@ KeyPair.prototype.inspect = function inspect() {
          ' pub: ' + (this.pub && this.pub.inspect()) + ' >';
 };
 
-},{"../../elliptic":70,"bn.js":67}],79:[function(require,module,exports){
+},{"../../elliptic":70,"bn.js":66}],79:[function(require,module,exports){
 'use strict';
 
 var BN = require('bn.js');
@@ -16041,7 +16595,7 @@ Signature.prototype.toDER = function toDER(enc) {
   return utils.encode(res, enc);
 };
 
-},{"../../elliptic":70,"bn.js":67}],80:[function(require,module,exports){
+},{"../../elliptic":70,"bn.js":66}],80:[function(require,module,exports){
 'use strict';
 
 var hash = require('hash.js');
@@ -16327,7 +16881,7 @@ Signature.prototype.toHex = function toHex() {
 
 module.exports = Signature;
 
-},{"../../elliptic":70,"bn.js":67}],83:[function(require,module,exports){
+},{"../../elliptic":70,"bn.js":66}],83:[function(require,module,exports){
 'use strict';
 
 var hash = require('hash.js');
@@ -17399,7 +17953,7 @@ function intFromLE(bytes) {
 utils.intFromLE = intFromLE;
 
 
-},{"bn.js":67}],86:[function(require,module,exports){
+},{"bn.js":66}],86:[function(require,module,exports){
 module.exports={
   "_from": "elliptic@6.3.3",
   "_id": "elliptic@6.3.3",
@@ -17792,24 +18346,28 @@ exports.shr64_lo = shr64_lo;
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    ctor.prototype = Object.create(superCtor.prototype, {
-      constructor: {
-        value: ctor,
-        enumerable: false,
-        writable: true,
-        configurable: true
-      }
-    });
+    if (superCtor) {
+      ctor.super_ = superCtor
+      ctor.prototype = Object.create(superCtor.prototype, {
+        constructor: {
+          value: ctor,
+          enumerable: false,
+          writable: true,
+          configurable: true
+        }
+      })
+    }
   };
 } else {
   // old school shim for old browsers
   module.exports = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    var TempCtor = function () {}
-    TempCtor.prototype = superCtor.prototype
-    ctor.prototype = new TempCtor()
-    ctor.prototype.constructor = ctor
+    if (superCtor) {
+      ctor.super_ = superCtor
+      var TempCtor = function () {}
+      TempCtor.prototype = superCtor.prototype
+      ctor.prototype = new TempCtor()
+      ctor.prototype.constructor = ctor
+    }
   }
 }
 
@@ -20894,7 +21452,7 @@ nacl.setPRNG = function(fn) {
 
 })(typeof module !== 'undefined' && module.exports ? module.exports : (self.nacl = self.nacl || {}));
 
-},{"crypto":69}],105:[function(require,module,exports){
+},{"crypto":68}],105:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -21842,7 +22400,7 @@ function blake2b(data) {
 }
 exports.blake2b = blake2b;
 
-},{"@ethersproject/bytes":24,"blake2b":66}],111:[function(require,module,exports){
+},{"@ethersproject/bytes":24,"blake2b":65}],111:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var abstract_provider_1 = require("@ethersproject/abstract-provider");
@@ -22066,7 +22624,7 @@ function getDefaultProvider(network) {
 }
 exports.getDefaultProvider = getDefaultProvider;
 
-},{"./utils":115,"@ethersproject-aion/contracts":112,"@ethersproject-aion/providers":119,"@ethersproject-aion/wallet":125,"@ethersproject/abstract-signer":17,"@ethersproject/constants":25,"@ethersproject/errors":27,"@ethersproject/wordlists":61}],114:[function(require,module,exports){
+},{"./utils":115,"@ethersproject-aion/contracts":112,"@ethersproject-aion/providers":119,"@ethersproject-aion/wallet":125,"@ethersproject/abstract-signer":17,"@ethersproject/constants":25,"@ethersproject/errors":27,"@ethersproject/wordlists":60}],114:[function(require,module,exports){
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -22179,7 +22737,7 @@ exports.ParamType = abi_2.ParamType;
 var wordlist_1 = require("@ethersproject/wordlists/wordlist");
 exports.Wordlist = wordlist_1.Wordlist;
 
-},{"@ethersproject-aion/abi":108,"@ethersproject-aion/address":109,"@ethersproject-aion/blake2b":110,"@ethersproject-aion/networks":117,"@ethersproject-aion/signing-key":123,"@ethersproject-aion/transactions":124,"@ethersproject/abi":14,"@ethersproject/base64":19,"@ethersproject/bignumber":23,"@ethersproject/bytes":24,"@ethersproject/hash":28,"@ethersproject/hdnode":29,"@ethersproject/keccak256":30,"@ethersproject/properties":33,"@ethersproject/random":38,"@ethersproject/rlp":40,"@ethersproject/sha2":41,"@ethersproject/solidity":55,"@ethersproject/strings":56,"@ethersproject/units":58,"@ethersproject/web":60,"@ethersproject/wordlists/wordlist":63}],116:[function(require,module,exports){
+},{"@ethersproject-aion/abi":108,"@ethersproject-aion/address":109,"@ethersproject-aion/blake2b":110,"@ethersproject-aion/networks":117,"@ethersproject-aion/signing-key":123,"@ethersproject-aion/transactions":124,"@ethersproject/abi":14,"@ethersproject/base64":19,"@ethersproject/bignumber":23,"@ethersproject/bytes":24,"@ethersproject/hash":28,"@ethersproject/hdnode":29,"@ethersproject/keccak256":30,"@ethersproject/properties":33,"@ethersproject/random":38,"@ethersproject/rlp":40,"@ethersproject/sha2":41,"@ethersproject/solidity":55,"@ethersproject/strings":56,"@ethersproject/units":58,"@ethersproject/web":59,"@ethersproject/wordlists/wordlist":62}],116:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var bytes_1 = require("@ethersproject/bytes");
@@ -22315,6 +22873,7 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var json_rpc_provider_1 = require("@ethersproject/providers/json-rpc-provider");
 exports.JsonRpcSigner = json_rpc_provider_1.JsonRpcSigner;
+var networks_1 = require("@ethersproject-aion/networks");
 var formatter_1 = require("./formatter");
 var JsonRpcProvider = /** @class */ (function (_super) {
     __extends(JsonRpcProvider, _super);
@@ -22324,11 +22883,14 @@ var JsonRpcProvider = /** @class */ (function (_super) {
     JsonRpcProvider.getFormatter = function () {
         return formatter_1.getDefaultFormatter();
     };
+    JsonRpcProvider.getNetwork = function (network) {
+        return networks_1.getNetwork(network);
+    };
     return JsonRpcProvider;
 }(json_rpc_provider_1.JsonRpcProvider));
 exports.JsonRpcProvider = JsonRpcProvider;
 
-},{"./formatter":118,"@ethersproject/providers/json-rpc-provider":36}],121:[function(require,module,exports){
+},{"./formatter":118,"@ethersproject-aion/networks":117,"@ethersproject/providers/json-rpc-provider":36}],121:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -22395,6 +22957,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var url_json_rpc_provider_1 = require("@ethersproject/providers/url-json-rpc-provider");
+var networks_1 = require("@ethersproject-aion/networks");
 var formatter_1 = require("./formatter");
 var UrlJsonRpcProvider = /** @class */ (function (_super) {
     __extends(UrlJsonRpcProvider, _super);
@@ -22404,6 +22967,9 @@ var UrlJsonRpcProvider = /** @class */ (function (_super) {
     UrlJsonRpcProvider.getFormatter = function () {
         return formatter_1.getDefaultFormatter();
     };
+    UrlJsonRpcProvider.getNetwork = function (network) {
+        return networks_1.getNetwork(network);
+    };
     UrlJsonRpcProvider.getUrl = function (network, apiKey) {
         return url_json_rpc_provider_1.UrlJsonRpcProvider.getUrl(network, apiKey);
     };
@@ -22411,7 +22977,7 @@ var UrlJsonRpcProvider = /** @class */ (function (_super) {
 }(url_json_rpc_provider_1.UrlJsonRpcProvider));
 exports.UrlJsonRpcProvider = UrlJsonRpcProvider;
 
-},{"./formatter":118,"@ethersproject/providers/url-json-rpc-provider":37}],123:[function(require,module,exports){
+},{"./formatter":118,"@ethersproject-aion/networks":117,"@ethersproject/providers/url-json-rpc-provider":37}],123:[function(require,module,exports){
 "use strict";
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;

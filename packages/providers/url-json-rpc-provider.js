@@ -15,6 +15,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var url_json_rpc_provider_1 = require("@ethersproject/providers/url-json-rpc-provider");
+var networks_1 = require("@ethersproject-aion/networks");
 var formatter_1 = require("./formatter");
 var UrlJsonRpcProvider = /** @class */ (function (_super) {
     __extends(UrlJsonRpcProvider, _super);
@@ -23,6 +24,9 @@ var UrlJsonRpcProvider = /** @class */ (function (_super) {
     }
     UrlJsonRpcProvider.getFormatter = function () {
         return formatter_1.getDefaultFormatter();
+    };
+    UrlJsonRpcProvider.getNetwork = function (network) {
+        return networks_1.getNetwork(network);
     };
     UrlJsonRpcProvider.getUrl = function (network, apiKey) {
         return url_json_rpc_provider_1.UrlJsonRpcProvider.getUrl(network, apiKey);

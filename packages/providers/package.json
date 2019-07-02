@@ -1,6 +1,6 @@
 {
   "name": "@ethersproject-aion/providers",
-  "version": "5.0.0-beta.127",
+  "version": "5.0.0-beta.128",
   "description": "Error utility functions for ethers.",
   "main": "index.js",
   "browser": {
@@ -20,8 +20,8 @@
     "@ethersproject/bignumber": ">5.0.0-beta.0",
     "@ethersproject/bytes": ">5.0.0-beta.0",
     "@ethersproject/errors": ">5.0.0-beta.0",
-    "@ethersproject/properties": ">5.0.0-beta.0",
-    "@ethersproject/providers": ">5.0.0-beta.0",
+    "@ethersproject/properties": ">=5.0.0-beta.127",
+    "@ethersproject/providers": ">=5.0.0-beta.135",
     "@ethersproject/rlp": ">5.0.0-beta.0",
     "@ethersproject/strings": ">5.0.0-beta.0",
     "@ethersproject/web": ">5.0.0-beta.0"
@@ -35,5 +35,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "tarballHash": "0xeae236f3215e304672a025c134910a3bd9ffc0a65c20794ba2853ce63f4515f9"
+  "tarballHash": "0x9558c01900090d158dadb7f54409a0e44db6c2ebbf4f575dc8a842d0b6b70f5b"
 }
